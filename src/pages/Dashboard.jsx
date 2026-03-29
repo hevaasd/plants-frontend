@@ -9,35 +9,46 @@ export default function Dashboard() {
   const [plants, setPlants] = useState([]);
   const [dark, setDark] = useState(false);
   const [lang, setLang] = useState("en");
+
   const user = JSON.parse(localStorage.getItem("user"));
   const t = translations[lang];
 
-  const fetchPlants = async () => { const res = await API.get("/plants"); setPlants(res.data); };
+  const fetchPlants = async () => {
+    const res = await API.get("/plants");
+    setPlants(res.data);
+  };
+
   useEffect(() => { fetchPlants(); }, []);
-  const deletePlant = async (id) => { await API.delete(`/plants/${id}`); fetchPlants(); };
-  const handleLogout = () => { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "/"; };
+
+  const deletePlant = async (id) => {
+    await API.delete(`/plants/${id}`);
+    fetchPlants();
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   return (
     <div style={{ backgroundColor: dark ? "#1e1e1e" : "#fafaf0", minHeight: "100vh" }}>
-      <Navbar user={user} handleLogout={handleLogout} lang={lang} setLang={setLang} />
+      <Navbar
+        user={user}
+        handleLogout={handleLogout}
+        lang={lang}
+        setLang={setLang}
+        dark={dark}
+        setDark={setDark}
+      />
 
-      {/* Dark Mode */}
-      <div className="text-center mt-3">
-        <button className="btn btn-outline-secondary" onClick={() => setDark(!dark)}>
-          {dark ? "Light Mode ☀️" : "Dark Mode 🌙"}
-        </button>
+      {/* Welcome message centered */}
+      <div className="text-center py-3" style={{ color: "#006400", fontWeight: "bold", fontSize: "1.5rem" }}>
+        Welcome {user?.name} 🌿
       </div>
 
-      {/* PDF Button */}
-      <div className="text-center my-3">
-        <button className="btn btn-primary" onClick={() => window.open("http://127.0.0.1:8000/api/plants/pdf")}>
-          Download PDF
-        </button>
-      </div>
-
-      {/* Graph */}
+      {/* Graph with colors */}
       <div className="mx-auto my-4" style={{ maxHeight: "300px", width: "90%" }}>
-        <PlantChart plants={plants} />
+        <PlantChart plants={plants} dark={dark} />
       </div>
 
       {/* Admin Form */}
@@ -52,8 +63,14 @@ export default function Dashboard() {
         <div className="row">
           {plants.map((p) => (
             <div className="col-md-4 mb-4" key={p.id}>
-              <div className="card h-100 shadow" style={{ borderRadius: "15px", backgroundColor: dark ? "#2f4f4f" : "#fdf6e3" }}>
-                <img src={`http://127.0.0.1:8000/storage/${p.image}`} className="card-img-top" alt={p.name} style={{ height: "180px", objectFit: "cover", borderRadius: "15px 15px 0 0" }} />
+              <div className="card h-100 shadow" style={{
+                borderRadius: "15px",
+                backgroundColor: dark ? "#2f4f4f" : "#fdf6e3"
+              }}>
+                <img src={`http://127.0.0.1:8000/storage/${p.image}`} 
+                     className="card-img-top" 
+                     alt={p.name} 
+                     style={{ height: "180px", objectFit: "cover", borderRadius: "15px 15px 0 0" }} />
                 <div className="card-body">
                   <h5 className="card-title">{p.name}</h5>
                   <p className="card-text">{p.description}</p>
